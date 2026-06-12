@@ -1,12 +1,10 @@
 /*
- * TOTEM — keymap replicado desde corne-wired.vil (Vial/QMK)
+ * TOTEM — keymap
  *
- * Cambios respecto al Corne:
- *  - Tecla exterior inferior izquierda = LCTRL (antes Shift)
- *  - Capa ADJ (3): fila superior derecha = perfiles Bluetooth 0-4
- *    y BT_CLR en la tecla exterior derecha
- *  - FN_MO13 / FN_MO23 (tri-layer VIA) -> &mo + conditional_layers
- *  - RGB eliminado (el TOTEM no tiene), QK_BOOT -> &bootloader
+ * - Tecla exterior inferior izquierda = LSHIFT (tap_dance: 1x shift, 2x caps lock)
+ * - LOWER + RAISE = capa ADJ (tri-layer) + LCTRL como modificador
+ *   → en capa ADJ las letras envían Ctrl+letra (Ctrl+C, Ctrl+V, etc.)
+ * - Capa ADJ: fila superior derecha = perfiles Bluetooth 0-4
  */
 
 #include <behaviors.dtsi>
@@ -20,6 +18,15 @@
 #define ADJ   3
 
 / {
+    behaviors {
+        td_shift_caps: tap_dance_shift_caps {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp LSHFT>, <&kp CAPS>;
+        };
+    };
+
     conditional_layers {
         compatible = "zmk,conditional-layers";
         tri_layer {
@@ -40,8 +47,8 @@
 //          │   A   │   S   │   D   │   F   │   G   │    │   H   │   J   │   K   │   L   │   ;   │
               &kp A   &kp S   &kp D   &kp F   &kp G        &kp H   &kp J   &kp K   &kp L   &kp SEMI
 //  ┌───────┼───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┼───────┼───────┐
-//  │ CTRL  │   Z   │   X   │   C   │   V   │   B   │    │   N   │   M   │   ,   │   .   │   /   │ BSPC  │
-    &kp LCTRL &kp Z   &kp X   &kp C   &kp V   &kp B        &kp N   &kp M &kp COMMA &kp DOT &kp FSLH &kp BSPC
+//  │ SHF/CL│   Z   │   X   │   C   │   V   │   B   │    │   N   │   M   │   ,   │   .   │   /   │ BSPC  │
+  &td_shift_caps &kp Z &kp X  &kp C   &kp V   &kp B        &kp N   &kp M &kp COMMA &kp DOT &kp FSLH &kp BSPC
 //  └───────┴───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┴───────┴───────┘
 //                  │  GUI  │ LOWER │ ENTER │              │ SPACE │ RAISE │  ESC  │
                     &kp LGUI &mo LOWER &kp RET          &kp SPACE &mo RAISE &kp ESC
@@ -57,7 +64,7 @@
 //          │ CTRL  │       │       │       │       │    │   ←   │   ↓   │   ↑   │   →   │  TAB  │
             &kp LCTRL &none   &none   &none   &none      &kp LEFT &kp DOWN &kp UP &kp RIGHT &kp TAB
 //  ┌───────┼───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┼───────┼───────┐
-//  │ (ctrl)│       │       │       │       │       │    │       │       │       │       │       │   '   │
+//  │ (shf) │       │       │       │       │       │    │       │       │       │       │       │   '   │
      &trans   &none   &none   &none   &none   &none        &none   &none   &none   &none   &none  &kp SQT
 //  └───────┴───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┴───────┴───────┘
 //                  │  GUI  │ ▽▽▽▽▽ │ SPACE │              │ SPACE │ ▽▽▽▽▽ │  GUI  │
@@ -74,7 +81,7 @@
 //          │       │       │       │       │       │    │   -   │   =   │   [   │   ]   │   \   │
               &none   &none   &none   &none   &none      &kp MINUS &kp EQUAL &kp LBKT &kp RBKT &kp BSLH
 //  ┌───────┼───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┼───────┼───────┐
-//  │ (ctrl)│   `   │       │       │       │       │    │   _   │   +   │   {   │   }   │   |   │   ~   │
+//  │ (shf) │   `   │       │       │       │       │    │   _   │   +   │   {   │   }   │   |   │   ~   │
      &trans &kp GRAVE &none   &none   &none   &none      &kp UNDER &kp PLUS &kp LBRC &kp RBRC &kp PIPE &kp TILDE
 //  └───────┴───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┴───────┴───────┘
 //                  │  GUI  │ ▽▽▽▽▽ │ SPACE │              │ SPACE │ ▽▽▽▽▽ │  GUI  │
@@ -84,15 +91,17 @@
 
         adjust_layer {
             display-name = "ADJ";
+            // LOWER+RAISE activa esta capa.
+            // Las letras envían Ctrl+letra → Ctrl+C = copiar, Ctrl+V = pegar, etc.
             bindings = <
 //          ┌───────┬───────┬───────┬───────┬───────┐    ┌───────┬───────┬───────┬───────┬───────┐
-//          │ BOOT  │       │   '   │       │       │    │ BT 0  │ BT 1  │ BT 2  │ BT 3  │ BT 4  │
-            &bootloader &none &kp SQT &none   &none    &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4
-//          │ RESET │       │       │       │       │    │       │       │       │       │       │
-            &sys_reset &none  &none   &none   &none        &none   &none   &none   &none   &none
+//          │ BOOT  │ Ct+W  │ Ct+E  │ Ct+R  │ Ct+T  │    │ BT 0  │ BT 1  │ BT 2  │ BT 3  │ BT 4  │
+            &bootloader &kp LC(W) &kp LC(E) &kp LC(R) &kp LC(T)  &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4
+//          │ RESET │ Ct+A  │ Ct+S  │ Ct+D  │ Ct+F  │    │       │       │       │       │       │
+            &sys_reset &kp LC(A) &kp LC(S) &kp LC(D) &kp LC(F)   &none   &none   &none   &none   &none
 //  ┌───────┼───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┼───────┼───────┐
-//  │ (ctrl)│USB/BLE│       │       │       │       │    │       │       │       │       │       │BT CLR │
-     &trans &out OUT_TOG &none &none  &none   &none        &none   &none   &none   &none   &none &bt BT_CLR
+//  │ (shf) │USB/BLE│ Ct+X  │ Ct+C  │ Ct+V  │ Ct+B  │    │ Ct+N  │ Ct+Z  │ Ct+Y  │       │       │BT CLR │
+     &trans &out OUT_TOG &kp LC(X) &kp LC(C) &kp LC(V) &kp LC(B)  &kp LC(N) &kp LC(Z) &kp LC(Y) &none &none &bt BT_CLR
 //  └───────┴───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┴───────┴───────┘
 //                  │  GUI  │ ▽▽▽▽▽ │ SPACE │              │ ENTER │ ▽▽▽▽▽ │  GUI  │
                     &kp LGUI  &trans &kp SPACE           &kp RET   &trans  &kp RGUI
