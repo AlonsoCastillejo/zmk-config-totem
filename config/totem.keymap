@@ -2,7 +2,8 @@
  * TOTEM — keymap replicado desde corne-wired.vil (Vial/QMK)
  *
  * Cambios respecto al Corne:
- *  - Tecla exterior inferior izquierda = LCTRL (antes Shift)
+ *  - Tecla exterior inferior izquierda = LSHIFT (tap) / CAPS (doble tap)
+ *  - Pulgar izquierdo ENTER = tap ENTER, hold LCTRL
  *  - Capa ADJ (3): fila superior derecha = perfiles Bluetooth 0-4
  *    y BT_CLR en la tecla exterior derecha
  *  - FN_MO13 / FN_MO23 (tri-layer VIA) -> &mo + conditional_layers
@@ -20,6 +21,15 @@
 #define ADJ   3
 
 / {
+    behaviors {
+        td_shift_caps: tap_dance_shift_caps {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp LSHFT>, <&kp CAPS>;
+        };
+    };
+
     conditional_layers {
         compatible = "zmk,conditional-layers";
         tri_layer {
@@ -40,8 +50,8 @@
 //          │   A   │   S   │   D   │   F   │   G   │    │   H   │   J   │   K   │   L   │   ;   │
               &kp A   &kp S   &kp D   &kp F   &kp G        &kp H   &kp J   &kp K   &kp L   &kp SEMI
 //  ┌───────┼───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┼───────┼───────┐
-//  │ CTRL  │   Z   │   X   │   C   │   V   │   B   │    │   N   │   M   │   ,   │   .   │   /   │ BSPC  │
-    &kp LCTRL &kp Z   &kp X   &kp C   &kp V   &kp B        &kp N   &kp M &kp COMMA &kp DOT &kp FSLH &kp BSPC
+//  │SHF/CPS│   Z   │   X   │   C   │   V   │   B   │    │   N   │   M   │   ,   │   .   │   /   │ BSPC  │
+    &td_shift_caps &kp Z   &kp X   &kp C   &kp V   &kp B        &kp N   &kp M &kp COMMA &kp DOT &kp FSLH &kp BSPC
 //  └───────┴───────┼───────┼───────┼───────┼───────┤    ├───────┼───────┼───────┼───────┴───────┴───────┘
 //                  │  GUI  │ LOWER │CTL/ENT│              │ SPACE │ RAISE │  ESC  │
                     &kp LGUI &mo LOWER &mt LCTRL RET          &kp SPACE &mo RAISE &kp ESC
